@@ -7,3 +7,25 @@ html
     meta(name='robots', content='all')
 
     link(rel='stylesheet', href='demo.css')
+
+    script(src="https://unpkg.com/rxdb@latest/dist/rxdb.browserify.min.js" type="text/javascript")
+
+    // mobx is a peer-dependency for rxcollection-subscribeer.
+    // As it's a reactive library, you may want to use it elsewhere in your project too.
+    script(src="https://unpkg.com/mobx@latest" type="text/javascript")
+
+    //- script(src="https://unpkg.com/rxcollection-subscriber@latest" type="text/javascript")
+    script(src="../../rxcollection-subscriber/dist/index.js" type="text/javascript")
+
+    // This lib is being used to generate fake data and is not required at all.
+    //- script(src="https://unpkg.com/faker@latest" type="text/javascript")
+    script(src="https://cdn.rawgit.com/Marak/faker.js/master/examples/browser/js/faker.js" type="text/javascript")
+
+
+  body
+    h1 RxCollection Subscriber Example / Demo
+    #layout
+      section
+        h2 Overview
+      section
+        h2 UI view
