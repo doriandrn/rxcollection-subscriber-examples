@@ -1,0 +1,23 @@
+{
+  "name": "rxcollection-subscriber-examples",
+  "version": "1.0.0",
+  "description": "Examples for rxcollection-subscriber",
+  "main": "dist/browser/index.html",
+  "repository": "https://github.com/doriandrn/rxcollection-subscriber-examples.git",
+  "author": "Dorian Tudorache <dorian.snaz@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "devDependencies": {
+    "postcss": "^7.0.32",
+    "pug": "^3.0.0",
+    "pug-cli": "^1.0.0-alpha6",
+    "rupture": "^0.7.1",
+    "stylus": "^0.54.7",
+    "webpack": "^4.43.0"
+  },
+  "scripts": {
+    "css": "stylus src/assets/styles/demo.styl --out ./dist -u rupture -I assets -I static -r -c --disable-cache -m & postcss ./dist/demeo.css --replace",
+    "html": "pug src/browser -P -o ./dist",
+    "build": "yarn css && yarn html"
+  }
+}
