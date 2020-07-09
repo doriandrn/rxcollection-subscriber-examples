@@ -1,14 +1,26 @@
-ol
+ol.table
   display: table;
   max-width: 100%;
+  padding: 0
+
   li
     display table-row
+
+    &:first-child:not([data-id])
+      span
+      strong
+        padding-bottom 20px
+        text-transform capitalize
+        color black
 
     span
     strong
       display: table-cell;
+      vertical-align top
       padding: 2px 4px;
       max-width: 30%;
+      font-family: 'IBM Plex Mono'
+      color #666
 
     img
       max-height: 48px;

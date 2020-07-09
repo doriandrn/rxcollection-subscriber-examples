@@ -8,8 +8,12 @@
   "license": "MIT",
   "private": false,
   "devDependencies": {
+    "autoprefixer": "^9.8.4",
     "postcss": "^7.0.32",
     "postcss-cli": "^7.1.1",
+    "postcss-font-magician": "^2.3.1",
+    "postcss-pxtorem": "^5.1.1",
+    "postcss-short": "^5.0.0",
     "pug": "^3.0.0",
     "pug-cli": "^1.0.0-alpha6",
     "rupture": "^0.7.1",
@@ -17,7 +21,7 @@
     "webpack": "^4.43.0"
   },
   "scripts": {
-    "css": "stylus src/assets/styles/demo.styl --out ./dist -u rupture -I assets -I static -r -c --disable-cache -m & postcss ./dist/demo.css --replace",
+    "css": "stylus src/assets/styles/demo.styl --out ./dist -u rupture -I assets -I static -r -c --disable-cache -m && postcss ./dist/demo.css --replace",
     "html": "pug src/browser -P -o ./dist",
     "build": "yarn css & yarn html"
   }
