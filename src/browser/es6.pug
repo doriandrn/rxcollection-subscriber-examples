@@ -82,9 +82,10 @@ html
         db = d;
         window.subscribers = {}
 
+        // For every collection
         schemas.map(schema => {
           db.collection(schema).then(col => {
-            const s = window.subscribers[schema.name] = new Subscriber(col)
+            const s = window.subscribers[schema.name] = new Subscriber(col, { multipleSelect: schema.name === 'users' })
 
             s.render({
               selector: `.${schema.name}`,
@@ -94,7 +95,10 @@ html
 
             // UI View
             if (schema.name === 'users') {
-              const s2 = window.subscribers[schema.name + 2] = new Subscriber(col, { criteria: { limit: 4 }})
+              const s2 = window.subscribers[schema.name + 2] = new Subscriber(col, {
+                criteria: { limit: 3, sort: { level: -1 } },
+                fields: ['name', 'avatar', 'level']
+              })
               s2.render({
                 selector: '.ui .users'
               })
@@ -109,14 +113,35 @@ html
       })
 
       document.addEventListener('click', (e) => {
-        console.log(e.target)
+        const { target } = e
+        const { parentNode } = target
+
+        const li = target && target.dataset && target.dataset.id ?
+          target :
+          parentNode && parentNode.dataset && parentNode.dataset.id ?
+            parentNode :
+            parentNode.parentNode && parentNode.parentNode.dataset && parentNode.parentNode.dataset.id ?
+              parentNode.parentNode : undefined
+        if (!li) return
+
+        const { dataset: { id } } = li
+        if ( !id ) return
+
+        const subscriberName = target.closest('[data-sub]').dataset.sub
+        const subscriber = window.subscribers[subscriberName]
+        //- console.log(`clicked item ${id} of ${subscriberName}`)
+        subscriber.select(id)
+        const { selectedId } = subscriber
+        li.classList.toggle('sel', selectedId.indexOf(id) > -1)
       })
 
       // var s = new Subscriber
 
   body
-    h1 RxCollection Subscriber Example / Demo
-    #layout
+    header
+      h1 RxCollection Subscriber Example / Demo
+
+    main#layout
       section
         h2 Overview
 
@@ -137,4 +162,4 @@ html
         .users
           h3 Top posters
 
-      footer
+    footer

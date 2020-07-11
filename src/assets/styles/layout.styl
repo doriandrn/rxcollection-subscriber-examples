@@ -3,6 +3,14 @@
   flex-flow row nowrap
   min-height 100vh
   max-width 100%
+  overflow-x hidden
+  border-top 1px solid #ddd
+  border-bottom 1px solid #ddd
+
+  figure
+    order -1
+    text-align center
+    padding 6px
 
   section
     padding 32px
@@ -11,12 +19,14 @@
     &.ui
       background #fafafa
 
+      > div
+        overflow-x auto
+        max-width 100%
+
       ol
         display flex
         flex-flow row nowrap
         padding 0
-        overflow-x auto
-        max-width 100%
 
         li
           display flex
@@ -31,3 +41,14 @@
 
         img
           border-radius 50%
+
+  .controls
+    display flex
+    flex-flow row nowrap
+    float right
+
+    > *:not(:first-child)
+      margin-left 32px
+
+    input[type="number"]
+      width 48px

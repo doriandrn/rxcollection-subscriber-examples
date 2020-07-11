@@ -6,6 +6,26 @@ ol.table
   li
     display table-row
 
+    &:nth-child(2n)
+      background-color #fafafa
+
+    > :first-child
+      padding-left 32px //alow for selects ticks
+
+    &.sel
+      > :first-child
+        position relative
+
+        &:before
+          content '✔'
+          position absolute
+          left 12px
+          font-size 10px
+          color green
+
+      > *
+        background-color: rgba(green, .05)
+
     &:first-child:not([data-id])
       span
       strong
@@ -13,20 +33,26 @@ ol.table
         text-transform capitalize
         color black
 
-    span
-    strong
+    > *
       display: table-cell;
       vertical-align top
-      padding: 2px 4px;
-      max-width: 30%;
+      padding: 16px;
+      max-width: 200px;
+      white-space nowrap
+      cursor default
+      text-overflow ellipsis
+      overflow auto
       font-family: 'IBM Plex Mono'
       color #666
 
     img
-      max-height: 48px;
-      border-radius: 48px;
+      max-height: 36px;
+      border-radius: 50%;
       width: auto
 
 .sortable
   text-decoration: underline;
   cursor: pointer;
+
+  *
+    cursor pointer
