@@ -2,6 +2,7 @@ ol.table
   display: table;
   max-width: 100%;
   padding: 0
+  width 100%
 
   li
     display table-row
@@ -41,7 +42,7 @@ ol.table
       white-space nowrap
       cursor default
       text-overflow ellipsis
-      overflow auto
+      overflow hidden
       font-family: 'IBM Plex Mono'
       color #666
 
@@ -53,6 +54,13 @@ ol.table
 .sortable
   text-decoration: underline;
   cursor: pointer;
+  position relative
+
+  &:hover
+    cursor: pointer
 
   *
     cursor pointer
+
+  &[data-dir]
+    font-weight 600

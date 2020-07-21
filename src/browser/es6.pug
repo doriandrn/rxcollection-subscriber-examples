@@ -57,7 +57,8 @@ html
               likes: { type: 'number' },
               views: { type: 'number' }
             },
-            indexes: ['views']
+            indexes: ['title', 'views'],
+            required: ['title', 'content', 'authors']
           }
         },
         {
@@ -68,41 +69,89 @@ html
             type: 'object',
             properties: {
               content: { type: 'string' },
-              postId: { type: 'string', ref: 'posts', items: { type: 'string' } },
-              userId: { type: 'string', ref: 'users', items: { type: 'string' } }
-            }
+              postId: { type: 'string', ref: 'posts' },
+              userId: { type: 'string', ref: 'users' }
+            },
+            required: ['content', 'userId', 'postId']
           }
         }
       ]
 
       RxDB.createRxDatabase({
-        name: 'demo3',
+        name: 'demo8',
         adapter: 'idb'
       }).then(d => {
         db = d;
-        window.subscribers = {}
+
+        // Lets build our context object. This is helpful for relationships between subscribers sharing data
+        // As we have 2 sections displaying, we'll use 2
+        window.subscribers = {
+          main: {},
+          ui: {}
+        }
 
         // For every collection
         schemas.map(schema => {
           db.collection(schema).then(col => {
-            const s = window.subscribers[schema.name] = new Subscriber(col, { multipleSelect: schema.name === 'users' })
+            const { name } = schema
 
-            s.render({
-              selector: `.${schema.name}`,
-              asTable: true,
-              fields: 'all'
-            })
+            let fields, criteria = {}, mapRefFields
 
-            // UI View
-            if (schema.name === 'users') {
-              const s2 = window.subscribers[schema.name + 2] = new Subscriber(col, {
-                criteria: { limit: 3, sort: { level: -1 } },
-                fields: ['name', 'avatar', 'level']
-              })
-              s2.render({
-                selector: '.ui .users'
-              })
+            // Let's do some custom adjustments for our second renderers
+            switch (name) {
+              case 'users':
+                criteria = { limit: 3, sort: { level: -1 } }
+                fields = ['name', 'avatar', 'level']
+                break
+
+              case 'posts':
+                criteria = { limit: 10 }
+                fields = ['title', 'authors', 'views']
+                mapRefFields = {
+                  authors: 'authors.name'
+                }
+                break
+
+              case 'comments':
+                mapRefFields = {
+                  userId: 'userId.name',
+                  postId: 'postId.title'
+                }
+                break
             }
+
+
+            db.waitForLeadership()
+            .then(() => {
+              const s = window.subscribers.main[name] = new Subscriber(col, { multipleSelect: name === 'users' })
+              const s2 = window.subscribers.ui[name] = new Subscriber(col, { criteria, fields })
+
+              db.requestIdlePromise().then(() => {
+                // UI View
+                s2.render({
+                  name: name,
+                  selector: `.ui .${name}`,
+                  controls: false,
+                  context: 'ui',
+                  persistState: false,
+                  holder: window.subscribers.ui,
+                  mapRefFields
+                })
+
+                s.render({
+                  name,
+                  selector: `.${name}`,
+                  asTable: true,
+                  fields: 'all',
+                  context: 'main',
+                  holder: window.subscribers.main,
+                  mapRefFields,
+                  linkRefFields: true,
+                  persistState: true // it's true by default, but for the sake of it :)
+                })
+
+              })
+            });
 
           })
         })
@@ -112,6 +161,11 @@ html
         if (db) db.destroy()
       })
 
+      window.onpopstate = function(event) {
+        console.log(`location: ${document.location}, state: ${JSON.stringify(event.state)}`)
+      }
+
+      // Check in 1 click if an item has been clicked and seelect it
       document.addEventListener('click', (e) => {
         const { target } = e
         const { parentNode } = target
@@ -127,19 +181,24 @@ html
         const { dataset: { id } } = li
         if ( !id ) return
 
-        const subscriberName = target.closest('[data-sub]').dataset.sub
-        const subscriber = window.subscribers[subscriberName]
-        //- console.log(`clicked item ${id} of ${subscriberName}`)
+        const holder = target.closest('[data-sub]')
+        if (!holder) return
+        const { sub, ctx } = holder.dataset
+        const subscriber = window.subscribers[ctx][sub]
+
         subscriber.select(id)
         const { selectedId } = subscriber
-        li.classList.toggle('sel', selectedId.indexOf(id) > -1)
+        if (typeof selectedId === 'object') {
+          li.classList.toggle('sel', selectedId.indexOf(id) > -1)
+        } else {
+          Array.from(li.parentNode.children).forEach(child => child.classList.remove('sel'))
+          if (selectedId.indexOf(id) === 0) li.classList.add('sel')
+        }
       })
-
-      // var s = new Subscriber
 
   body
     header
-      h1 RxCollection Subscriber Example / Demo
+      h1 #[a(href="https://www.npmjs.com/package/rxcollection-subscriber") RxCollection Subscriber] HTML Example / Demo
 
     main#layout
       section
@@ -151,15 +210,25 @@ html
 
         .posts
           h3 Posts
+          button.big(onclick="db.posts.insert({ title: faker.lorem.sentence(), content: faker.lorem.paragraph(5), authors: subscribers.main.users.selectedId, views: faker.random.number({ min: 132, max: 970}), likes: faker.random.number({ min: 300, max: 10000}) });") Add new
 
         .comments
           h3 Comments
-          p empty
+          button.big(onclick="db.comments.insert({ content: faker.lorem.paragraph(), userId: subscribers.main.users.selectedId[0], postId: subscribers.main.posts.selectedId });") Add new
+
 
       section.ui
         h2 UI view
 
+        .posts
+          h3 Most viewed today
+
         .users
           h3 Top posters
+
+        .comments
+          h3 Top comments
+
+      #modal
 
     footer
