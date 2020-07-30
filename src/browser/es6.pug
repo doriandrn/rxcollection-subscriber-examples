@@ -131,7 +131,6 @@ html
                 s2.render({
                   name: name,
                   selector: `.ui .${name}`,
-                  controls: false,
                   context: 'ui',
                   persistState: false,
                   holder: window.subscribers.ui,
@@ -144,6 +143,7 @@ html
                   asTable: true,
                   fields: 'all',
                   context: 'main',
+                  controls: true,
                   holder: window.subscribers.main,
                   mapRefFields,
                   linkRefFields: true,
